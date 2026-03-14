@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SynapseIQ — Brain vs Machine</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  /* Palette: butter cream bg, violet accent, burgundy, warm brown */
+  --bg:       #fdf8f0;
+  --bg2:      #f7f0e4;
+  --bg3:      #ede4d3;
+  --bg4:      #e3d8c5;
+
+  --violet:   #6b3fa0;
+  --violet2:  #8b5cc7;
+  --violet-l: #ede5f8;
+  --violet-ll:#f6f1fc;
+
+  --burg:     #7c2040;
+  --burg2:    #a03358;
+  --burg-l:   #f5e4ea;
+
+  --brown:    #5c3d1e;
+  --brown2:   #8a5c2e;
+  --brown-l:  #f2ead9;
+
+  --butter:   #f4c842;
+  --butter2:  #e8a820;
+  --butter-l: #fef9e7;
+
+  --text:     #2a1a0e;
+  --text2:    #5c3d1e;
+  --muted:    #8a7060;
+  --border:   rgba(92,61,30,0.12);
+  --border2:  rgba(92,61,30,0.2);
+  --shadow:   rgba(92,61,30,0.08);
+
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --radius:16px;
+}
+
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;line-height:1.6;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px;}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(253,248,240,0.92);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:var(--serif);font-size:20px;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--text);}
+nav ul{display:flex;gap:2px;list-style:none;}
+nav ul li a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:400;padding:7px 14px;border-radius:30px;transition:all .2s;cursor:pointer;display:block;}
+nav ul li a:hover{color:var(--text);background:var(--bg3);}
+nav ul li a.active{color:var(--violet);background:var(--violet-ll);font-weight:500;}
+.nav-cta{
+  background:linear-gradient(135deg,var(--burg),var(--violet));
+  border:none;color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;
+  padding:8px 20px;border-radius:30px;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.nav-cta:hover{opacity:0.88;transform:translateY(-1px);box-shadow:0 6px 20px rgba(107,63,160,0.25);}
+
+/* ── PAGES ── */
+.page{display:none;padding-top:65px;}
+.page.active{display:block;animation:fadeUp .4s cubic-bezier(.16,1,.3,1);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO ── */
+.hero{
+  min-height:calc(100vh - 65px);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:80px 48px 60px;position:relative;overflow:hidden;
+}
+.hero-grid-bg{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
+.glow1{position:absolute;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(107,63,160,0.1),transparent 70%);top:-180px;left:-120px;pointer-events:none;}
+.glow2{position:absolute;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(124,32,64,0.09),transparent 70%);bottom:-180px;right:-120px;pointer-events:none;}
+#neuron-bg{position:absolute;inset:0;pointer-events:none;opacity:0.35;}
+
+.hero-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--border2);
+  padding:6px 16px 6px 10px;border-radius:30px;margin-bottom:32px;
+  background:var(--bg2);position:relative;z-index:2;
+}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--violet2);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+h1.hero-title{
+  font-family:var(--serif);font-size:clamp(48px,7.5vw,86px);
+  line-height:1.02;letter-spacing:-3px;max-width:880px;margin-bottom:24px;
+  font-weight:400;color:var(--text);position:relative;z-index:2;
+}
+h1.hero-title .l2{display:block;font-style:italic;}
+h1.hero-title em{
+  background:linear-gradient(135deg,var(--burg) 0%,var(--violet) 50%,var(--butter2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;
+}
+.hero-sub{color:var(--muted);font-size:17px;max-width:520px;line-height:1.75;margin-bottom:40px;font-weight:300;position:relative;z-index:2;}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2;}
+
+.btn{font-family:var(--sans);font-size:14px;font-weight:500;padding:13px 30px;border-radius:30px;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);border:none;}
+.btn-grad{background:linear-gradient(135deg,var(--burg),var(--violet));color:#fff;}
+.btn-grad:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(107,63,160,0.3);}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);}
+.btn-ghost:hover{background:var(--bg3);}
+
+.hero-stats{
+  display:flex;gap:1px;margin-top:64px;
+  background:var(--border);border-radius:18px;overflow:hidden;
+  border:1px solid var(--border);position:relative;z-index:2;
+  box-shadow:0 4px 20px var(--shadow);
+}
+.stat{flex:1;padding:20px 24px;background:var(--bg2);text-align:center;transition:background .2s;}
+.stat:hover{background:var(--bg3);}
+.stat-num{font-family:var(--serif);font-size:28px;letter-spacing:-1px;margin-bottom:4px;color:var(--text);}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+
+/* ── SECTION ── */
+.section{padding:72px 48px;max-width:1160px;margin:0 auto;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.eline{width:22px;height:1px;background:var(--muted);}
+.stitle{font-family:var(--serif);font-size:clamp(34px,4.5vw,52px);letter-spacing:-1.5px;margin-bottom:14px;line-height:1.08;font-weight:400;color:var(--text);}
+.ssub{color:var(--muted);font-size:15px;line-height:1.75;max-width:560px;margin-bottom:52px;font-weight:300;}
+
+/* ── BIO ── */
+.bio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px var(--shadow);}
+@media(max-width:768px){.bio-grid{grid-template-columns:1fr;}}
+.bio-card{background:var(--bg2);padding:34px 30px;transition:all .3s;cursor:default;position:relative;overflow:hidden;}
+.bio-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(107,63,160,0.05),rgba(124,32,64,0.04));opacity:0;transition:opacity .3s;}
+.bio-card:hover{background:var(--bg3);}
+.bio-card:hover::after{opacity:1;}
+.bio-num{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--violet2);margin-bottom:18px;opacity:0.9;}
+.bio-card h3{font-family:var(--serif);font-size:21px;margin-bottom:10px;letter-spacing:-0.5px;font-weight:400;color:var(--text);}
+.bio-card p{color:var(--muted);font-size:13px;line-height:1.7;font-weight:300;}
+.bio-foot{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--burg2);}
+
+/* ── NEURON STRUCTURE ── */
+.nstruct-wrap{display:flex;flex-direction:column;gap:28px;}
+.nstruct-top{display:grid;grid-template-columns:1fr auto;align-items:start;gap:24px;}
+@media(max-width:700px){.nstruct-top{grid-template-columns:1fr;}}
+.nstruct-canvas-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;box-shadow:0 4px 20px var(--shadow);}
+.nstruct-canvas-box h3{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.4px;margin-bottom:4px;color:var(--text);}
+.nstruct-canvas-box p{color:var(--muted);font-size:12px;margin-bottom:16px;font-weight:300;}
+#nstruct-svg{width:100%;display:block;overflow:visible;}
+.nstruct-tooltip{
+  position:absolute;background:var(--text);color:var(--bg);
+  font-size:12px;font-weight:500;padding:5px 11px;border-radius:20px;
+  pointer-events:none;opacity:0;transition:opacity .18s;white-space:nowrap;
+  letter-spacing:0.3px;transform:translateX(-50%);
+}
+.nstruct-pills{display:flex;flex-direction:column;gap:10px;min-width:170px;}
+.nstruct-pills h4{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.npill{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:12px;border:1px solid var(--border);
+  background:var(--bg2);cursor:pointer;transition:all .2s;
+  font-size:13px;font-weight:400;color:var(--text);
+}
+.npill:hover{background:var(--bg3);border-color:var(--border2);}
+.npill.active{border-color:currentColor;font-weight:500;}
+.npill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.nstruct-info{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;box-shadow:0 2px 10px var(--shadow);min-height:80px;}
+.nstruct-info-title{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:6px;color:var(--text);}
+.nstruct-info-tag{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:20px;}
+.nstruct-info p{color:var(--muted);font-size:13.5px;line-height:1.7;font-weight:300;}
+.nexplorer{display:grid;grid-template-columns:1.25fr 0.75fr;gap:28px;align-items:start;}
+@media(max-width:880px){.nexplorer{grid-template-columns:1fr;}}
+.nbox{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:sticky;top:85px;box-shadow:0 4px 20px var(--shadow);}
+.nbox-title{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:-0.5px;margin-bottom:5px;color:var(--text);}
+.nbox-sub{color:var(--muted);font-size:12.5px;margin-bottom:18px;font-weight:300;}
+#neuron-canvas{width:100%;display:block;border-radius:10px;background:var(--bg);}
+.sig-track{margin-top:12px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.sig-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--violet2),var(--burg));border-radius:2px;transition:width .04s linear;}
+.nbtns{display:flex;gap:8px;margin-top:14px;}
+.nbtn{
+  font-family:var(--sans);font-size:12px;font-weight:500;
+  padding:8px 18px;border-radius:30px;cursor:pointer;transition:all .2s;
+  border:1px solid var(--border2);background:var(--bg3);color:var(--muted);
+}
+.nbtn:hover{color:var(--text);border-color:var(--border2);background:var(--bg4);}
+.nbtn.lit{color:#fff;background:linear-gradient(135deg,var(--burg),var(--violet));border-color:transparent;}
+
+.nparts{display:flex;flex-direction:column;gap:12px;}
+.npart{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+}
+.npart::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px 0 0 2px;background:transparent;transition:background .3s;}
+.npart:hover{background:var(--bg3);}
+.npart.sel{border-color:rgba(107,63,160,0.3);background:var(--violet-ll);}
+.npart.sel::before{background:var(--violet2);}
+.ptag{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--violet2);margin-bottom:6px;display:block;}
+.npart h4{font-size:14px;font-weight:500;margin-bottom:4px;color:var(--text);}
+.npart p{color:var(--muted);font-size:12px;line-height:1.6;font-weight:300;}
+
+/* ── MACHINE ── */
+.mgrid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px;align-items:start;}
+@media(max-width:900px){.mgrid{grid-template-columns:1fr;}}
+.ann-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:30px;position:sticky;top:85px;box-shadow:0 4px 20px var(--shadow);}
+.ann-title{font-family:var(--serif);font-size:21px;margin-bottom:5px;font-weight:400;letter-spacing:-0.5px;color:var(--text);}
+.ann-sub{color:var(--muted);font-size:13px;margin-bottom:22px;font-weight:300;}
+#ann-canvas{width:100%;border-radius:10px;display:block;background:var(--bg);}
+.ctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.ctrl{background:var(--bg3);border-radius:12px;padding:13px 15px;}
+.ctrl-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:flex;justify-content:space-between;}
+.ctrl-lbl span{color:var(--text);font-size:14px;letter-spacing:0;text-transform:none;font-weight:500;}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;background:var(--bg4);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--violet2),var(--burg));cursor:pointer;}
+
+.mstack{display:flex;flex-direction:column;gap:14px;}
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 26px;transition:all .22s;box-shadow:0 2px 8px var(--shadow);}
+.mcard:hover{border-color:rgba(107,63,160,0.25);background:var(--violet-ll);}
+.mbadge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--violet);background:var(--violet-l);padding:4px 10px;border-radius:20px;margin-bottom:9px;}
+.mcard h4{font-size:15px;font-weight:500;margin-bottom:7px;color:var(--text);}
+.mcard p{color:var(--muted);font-size:13px;line-height:1.65;font-weight:300;}
+
+/* ── COMPARE ── */
+.c2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:36px;}
+@media(max-width:580px){.c2{grid-template-columns:1fr;}}
+.chero{border-radius:var(--radius);padding:28px;position:relative;overflow:hidden;}
+.chero.bio{background:linear-gradient(135deg,var(--brown-l),rgba(242,234,217,0.4));border:1px solid rgba(92,61,30,0.18);}
+.chero.mach{background:linear-gradient(135deg,var(--violet-l),rgba(237,229,248,0.4));border:1px solid rgba(107,63,160,0.2);}
+.clbl{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.bio .clbl{color:var(--brown2);}.mach .clbl{color:var(--violet);}
+.ctitle{font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-0.5px;margin-bottom:5px;color:var(--text);}
+.csub{color:var(--muted);font-size:13px;font-weight:300;}
+.cbg{position:absolute;right:16px;bottom:-16px;font-family:var(--serif);font-size:90px;font-weight:400;opacity:0.06;letter-spacing:-4px;line-height:1;pointer-events:none;color:var(--text);}
+
+.ctable-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 24px var(--shadow);}
+.ctable{width:100%;border-collapse:collapse;font-size:14px;}
+.ctable thead tr{background:var(--bg3);}
+.ctable th{padding:14px 22px;text-align:left;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.ctable td{padding:15px 22px;border-bottom:1px solid rgba(92,61,30,0.06);vertical-align:middle;color:var(--text);}
+.ctable td:first-child{color:var(--muted);font-size:13px;}
+.ctable tr:last-child td{border-bottom:none;}
+.ctable tr:hover td{background:var(--bg3);}
+.bv{color:var(--brown2);font-weight:400;}
+.mv{color:var(--violet);font-weight:400;}
+
+/* ── TEAM ── */
+.tintro{
+  background:linear-gradient(135deg,var(--butter-l),var(--violet-ll));
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:36px;margin-bottom:36px;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;
+  box-shadow:0 4px 20px var(--shadow);
+}
+.tintro h3{font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-0.5px;margin-bottom:7px;color:var(--text);}
+.tintro p{color:var(--muted);font-size:14px;font-weight:300;line-height:1.7;max-width:520px;}
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:768px){.tgrid{grid-template-columns:repeat(2,1fr);}}
+.tcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 18px;text-align:center;transition:all .22s;box-shadow:0 2px 8px var(--shadow);}
+.tcard:hover{border-color:rgba(107,63,160,0.25);background:var(--violet-ll);transform:translateY(-3px);}
+.tav{width:52px;height:52px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:17px;position:relative;}
+.tav::after{content:'';position:absolute;inset:-2px;border-radius:50%;background:linear-gradient(135deg,var(--violet2),var(--burg));z-index:-1;opacity:0.35;}
+.tname{font-size:13px;font-weight:500;margin-bottom:3px;color:var(--text);}
+.trole{font-size:11px;color:var(--muted);line-height:1.5;font-weight:300;}
+
+footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;background:var(--bg2);}
+.flogo{font-family:var(--serif);font-size:16px;color:var(--text);}
+
+/* ── HAMBURGER ── */
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:transparent;}
+.ham span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .25s;}
+.ham.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.ham.open span:nth-child(2){opacity:0;}
+.ham.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* Mobile drawer */
+.mobile-menu{
+  display:none;position:fixed;top:57px;left:0;right:0;z-index:199;
+  background:rgba(253,248,240,0.98);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px 20px;
+  flex-direction:column;gap:4px;
+}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{
+  color:var(--muted);font-size:15px;font-weight:400;
+  padding:11px 16px;border-radius:12px;cursor:pointer;
+  transition:all .18s;border:none;background:transparent;text-align:left;
+}
+.mobile-menu a:hover,.mobile-menu a.active{color:var(--violet);background:var(--violet-ll);font-weight:500;}
+.mobile-menu .mob-cta{
+  margin-top:8px;background:linear-gradient(135deg,var(--burg),var(--violet));
+  color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;
+  padding:12px 20px;border-radius:30px;cursor:pointer;border:none;
+  text-align:center;width:100%;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  /* Nav */
+  nav{padding:12px 20px;}
+  nav ul,.nav-cta{display:none;}
+  .ham{display:flex;}
+
+  /* Hero */
+  .hero{padding:52px 20px 40px;min-height:auto;}
+  h1.hero-title{font-size:clamp(38px,10vw,56px);letter-spacing:-2px;}
+  .hero-sub{font-size:15px;}
+  .hero-stats{flex-wrap:wrap;margin-top:40px;border-radius:14px;}
+  .stat{flex:1 1 40%;padding:14px 16px;}
+  .stat-num{font-size:22px;}
+
+  /* Section */
+  .section{padding:48px 20px;}
+  .stitle{font-size:clamp(28px,7vw,40px);letter-spacing:-1px;}
+  .ssub{margin-bottom:36px;font-size:14px;}
+
+  /* Bio grid */
+  .bio-grid{grid-template-columns:1fr;}
+  .bio-card{padding:26px 22px;}
+
+  /* Neuron Structure */
+  .nstruct-top{grid-template-columns:1fr;}
+  .nstruct-pills{flex-direction:row;flex-wrap:wrap;min-width:unset;gap:8px;}
+  .nstruct-pills h4{width:100%;}
+  .npill{font-size:12px;padding:8px 12px;}
+  .nstruct-canvas-box{padding:18px 16px;}
+  .nstruct-info{padding:18px 20px;}
+  .nstruct-info p{font-size:13px;}
+
+  /* Neuron Explorer */
+  .nexplorer{grid-template-columns:1fr;}
+  .nbox{position:static;padding:20px 18px;}
+  .nbtns{flex-wrap:wrap;}
+  .nbtn{font-size:11px;padding:7px 14px;}
+
+  /* Machine */
+  .mgrid{grid-template-columns:1fr;}
+  .ann-wrap{position:static;padding:20px 18px;}
+  .ctrl-row{grid-template-columns:1fr;}
+
+  /* Compare */
+  .c2{grid-template-columns:1fr;}
+  .ctable-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .ctable{min-width:520px;}
+  .ctable th,.ctable td{padding:12px 14px;font-size:13px;}
+
+  /* Team */
+  .tgrid{grid-template-columns:repeat(2,1fr);}
+  .tintro{grid-template-columns:1fr;gap:12px;}
+  .tintro > div:last-child{display:none;}
+
+  /* Footer */
+  footer{flex-direction:column;gap:8px;text-align:center;padding:20px;}
+}
+
+@media(max-width:400px){
+  .stat{flex:1 1 100%;}
+  .tgrid{grid-template-columns:1fr 1fr;}
+  h1.hero-title{font-size:36px;letter-spacing:-1.5px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="show('home');closeMobileMenu()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="4" fill="url(#ng)"/>
+      <circle cx="4"  cy="4"  r="2" fill="rgba(107,63,160,.5)"/>
+      <circle cx="20" cy="4"  r="2" fill="rgba(124,32,64,.5)"/>
+      <circle cx="4"  cy="20" r="2" fill="rgba(107,63,160,.35)"/>
+      <circle cx="20" cy="20" r="2" fill="rgba(124,32,64,.35)"/>
+      <line x1="6"  y1="5.5" x2="9.5"  y2="9"  stroke="rgba(107,63,160,.4)"  stroke-width=".8"/>
+      <line x1="18" y1="5.5" x2="14.5" y2="9"  stroke="rgba(124,32,64,.4)"   stroke-width=".8"/>
+      <line x1="6"  y1="18.5" x2="9.5"  y2="15" stroke="rgba(107,63,160,.3)" stroke-width=".8"/>
+      <line x1="18" y1="18.5" x2="14.5" y2="15" stroke="rgba(124,32,64,.3)"  stroke-width=".8"/>
+      <defs><linearGradient id="ng" x1="8" y1="8" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#8b5cc7"/><stop offset="1" stop-color="#a03358"/>
+      </linearGradient></defs>
+    </svg>
+    SynapseIQ
+  </div>
+  <ul id="nl">
+    <li><a class="active" onclick="show('home',this)">Home</a></li>
+    <li><a onclick="show('bio',this)">Brain</a></li>
+    <li><a onclick="show('nstruct',this)">Neuron Structure</a></li>
+    <li><a onclick="show('neuron',this)">Neuron Explorer</a></li>
+    <li><a onclick="show('machine',this)">The Machine</a></li>
+    <li><a onclick="show('compare',this)">Compare</a></li>
+    <li><a onclick="show('team',this)">Team</a></li>
+  </ul>
+  <button class="nav-cta" onclick="show('nstruct',document.querySelectorAll('#nl a')[2])">Neuron Structure →</button>
+  <button class="ham" id="ham-btn" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-menu" id="mobile-menu">
+  <a onclick="mobileNav('home')"    id="mob-home">Home</a>
+  <a onclick="mobileNav('bio')"     id="mob-bio">Brain</a>
+  <a onclick="mobileNav('nstruct')" id="mob-nstruct">Neuron Structure</a>
+  <a onclick="mobileNav('neuron')"  id="mob-neuron">Neuron Explorer</a>
+  <a onclick="mobileNav('machine')" id="mob-machine">The Machine</a>
+  <a onclick="mobileNav('compare')" id="mob-compare">Compare</a>
+  <a onclick="mobileNav('team')"    id="mob-team">Team</a>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="hero-grid-bg"></div>
+    <div class="glow1"></div><div class="glow2"></div>
+    <canvas id="neuron-bg"></canvas>
+    <div class="hero-chip"><span class="chip-dot"></span>Unit 4 — Neurobiology &amp; AI</div>
+    <h1 class="hero-title">Where neurons<span class="l2">meet <em>networks</em></span></h1>
+    <p class="hero-sub">A deep dive into the biological brain and artificial neural networks — from synapses to backpropagation, from glial cells to gradient descent.</p>
+    <div class="hero-actions">
+      <button class="btn btn-grad" onclick="show('compare',document.querySelectorAll('#nl a')[5])">Explore Comparison</button>
+      <button class="btn btn-ghost" onclick="show('nstruct',document.querySelectorAll('#nl a')[2])">Neuron Structure →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">86B</div><div class="stat-label">Neurons</div></div>
+      <div class="stat"><div class="stat-num">100T</div><div class="stat-label">Synapses</div></div>
+      <div class="stat"><div class="stat-num">120m/s</div><div class="stat-label">Signal speed</div></div>
+      <div class="stat"><div class="stat-num">20W</div><div class="stat-label">Power use</div></div>
+      <div class="stat"><div class="stat-num">1.4kg</div><div class="stat-label">Brain weight</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BRAIN -->
+<div id="bio" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>Biological Brain</div>
+    <h2 class="stitle">The original neural network</h2>
+    <p class="ssub">The human brain — 1.4 kg of tissue — contains more connections than stars in the Milky Way and remains the most complex structure ever studied.</p>
+    <div class="bio-grid">
+      <div class="bio-card"><div class="bio-num">01 / STRUCTURE</div><h3>Neurons</h3><p>Specialised excitable cells transmitting electrical and chemical signals. Each has dendrites, a soma, and an axon that fires all-or-nothing action potentials at up to 120 m/s — the fundamental unit of neural computation.</p><div class="bio-foot">~86 billion in the human brain</div></div>
+      <div class="bio-card"><div class="bio-num">02 / CONNECTIVITY</div><h3>Synapses</h3><p>Junctions where signals pass via neurotransmitters. Synaptic strength changes through Hebbian plasticity — "neurons that fire together, wire together" — the cellular mechanism behind all learning and long-term memory.</p><div class="bio-foot">~100 trillion connections</div></div>
+      <div class="bio-card"><div class="bio-num">03 / SUPPORT</div><h3>Glial Cells</h3><p>Non-neuronal support cells outnumbering neurons 10:1. Astrocytes regulate synaptic chemistry, microglia act as immune sentinels, and oligodendrocytes form the myelin sheath that speeds signal conduction up to 100-fold.</p><div class="bio-foot">10× more than neurons</div></div>
+      <div class="bio-card"><div class="bio-num">04 / ANATOMY</div><h3>Brain Regions</h3><p>The cerebrum handles conscious thought across four lobes. The cerebellum coordinates movement. The brainstem controls autonomic functions. The hippocampus and amygdala govern memory and emotion in the limbic system.</p><div class="bio-foot">4 lobes in the cerebral cortex</div></div>
+      <div class="bio-card"><div class="bio-num">05 / CHEMISTRY</div><h3>Neurotransmitters</h3><p>Glutamate (excitatory) and GABA (inhibitory) are the workhorses. Dopamine modulates reward, serotonin regulates mood, and acetylcholine drives memory and neuromuscular activation across 100+ known types.</p><div class="bio-foot">100+ known types</div></div>
+      <div class="bio-card"><div class="bio-num">06 / ADAPTATION</div><h3>Neuroplasticity</h3><p>The brain's lifelong capacity to reorganise by forming new connections. Long-term potentiation (LTP) strengthens repeatedly activated pathways, underpinning learning, skill acquisition, and recovery from neurological injury.</p><div class="bio-foot">Continues throughout life</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEURON STRUCTURE -->
+<div id="nstruct" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>Neuron Structure</div>
+    <h2 class="stitle">Parts of a neuron</h2>
+    <p class="ssub">Hover over any part of the diagram to see it glow and reveal its name. Click a part button to isolate it — everything else fades away.</p>
+    <div class="nstruct-wrap">
+      <div class="nstruct-top">
+        <div class="nstruct-canvas-box">
+          <h3>Interactive Neuron</h3>
+          <p>Hover to identify · Click a button to isolate a part</p>
+          <div style="position:relative">
+            <svg id="nstruct-svg" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- ── DENDRITES ── -->
+              <g id="ns-dendrites" class="ns-part" data-part="dendrites" style="cursor:pointer">
+                <path d="M168 140 Q128 105 88 75"  fill="none" stroke="#6b3fa0" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M168 140 Q122 130 80 118" fill="none" stroke="#6b3fa0" stroke-width="3"   stroke-linecap="round"/>
+                <path d="M168 140 Q126 152 84 162" fill="none" stroke="#6b3fa0" stroke-width="3"   stroke-linecap="round"/>
+                <path d="M168 140 Q130 168 92 198" fill="none" stroke="#6b3fa0" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M152 132 Q116 90 82 55"   fill="none" stroke="#6b3fa0" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M155 150 Q118 188 86 220" fill="none" stroke="#6b3fa0" stroke-width="2.2" stroke-linecap="round"/>
+                <!-- terminal knobs -->
+                <circle cx="88"  cy="75"  r="4.5" fill="#6b3fa0" opacity="0.75"/>
+                <circle cx="80"  cy="118" r="4"   fill="#6b3fa0" opacity="0.7"/>
+                <circle cx="84"  cy="162" r="4"   fill="#6b3fa0" opacity="0.7"/>
+                <circle cx="92"  cy="198" r="4.5" fill="#6b3fa0" opacity="0.75"/>
+                <circle cx="82"  cy="55"  r="3.5" fill="#6b3fa0" opacity="0.6"/>
+                <circle cx="86"  cy="220" r="3.5" fill="#6b3fa0" opacity="0.6"/>
+              </g>
+
+              <!-- ── SOMA ── -->
+              <g id="ns-soma" class="ns-part" data-part="soma" style="cursor:pointer">
+                <circle cx="200" cy="140" r="38" fill="rgba(192,122,16,0.18)" stroke="#c07a10" stroke-width="2"/>
+                <circle cx="200" cy="140" r="14" fill="rgba(240,180,60,0.5)"  stroke="rgba(192,122,16,0.55)" stroke-width="1.2"/>
+              </g>
+
+              <!-- ── AXON HILLOCK ── -->
+              <g id="ns-hillock" class="ns-part" data-part="hillock" style="cursor:pointer">
+                <path d="M238 140 Q258 140 272 140" fill="none" stroke="#8a5c2e" stroke-width="5" stroke-linecap="round"/>
+              </g>
+
+              <!-- ── MYELIN SHEATH (segments) ── -->
+              <g id="ns-myelin" class="ns-part" data-part="myelin" style="cursor:pointer">
+                <rect x="278"  y="129" width="38" height="22" rx="7" fill="rgba(92,122,62,0.2)"  stroke="#5c7a3e" stroke-width="1.2"/>
+                <rect x="330"  y="129" width="38" height="22" rx="7" fill="rgba(92,122,62,0.2)"  stroke="#5c7a3e" stroke-width="1.2"/>
+                <rect x="382"  y="129" width="38" height="22" rx="7" fill="rgba(92,122,62,0.2)"  stroke="#5c7a3e" stroke-width="1.2"/>
+                <rect x="434"  y="129" width="38" height="22" rx="7" fill="rgba(92,122,62,0.2)"  stroke="#5c7a3e" stroke-width="1.2"/>
+                <rect x="486"  y="129" width="38" height="22" rx="7" fill="rgba(92,122,62,0.2)"  stroke="#5c7a3e" stroke-width="1.2"/>
+                <!-- NoR gap labels -->
+                <text x="320"  y="162" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(92,122,62,0.6)" text-anchor="middle">NoR</text>
+                <text x="372"  y="162" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(92,122,62,0.6)" text-anchor="middle">NoR</text>
+                <text x="424"  y="162" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(92,122,62,0.6)" text-anchor="middle">NoR</text>
+                <text x="476"  y="162" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(92,122,62,0.6)" text-anchor="middle">NoR</text>
+              </g>
+
+              <!-- ── AXON (underneath myelin) ── -->
+              <g id="ns-axon" class="ns-part" data-part="axon" style="cursor:pointer">
+                <line x1="272" y1="140" x2="532" y2="140" stroke="#7c2040" stroke-width="5" stroke-linecap="round"/>
+              </g>
+
+              <!-- ── AXON TERMINALS ── -->
+              <g id="ns-terminal" class="ns-part" data-part="terminal" style="cursor:pointer">
+                <path d="M532 140 Q555 118 575 100" fill="none" stroke="#a03358" stroke-width="2.8" stroke-linecap="round"/>
+                <path d="M532 140 Q558 132 580 122" fill="none" stroke="#a03358" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M532 140 Q560 140 584 140" fill="none" stroke="#a03358" stroke-width="2.8" stroke-linecap="round"/>
+                <path d="M532 140 Q558 150 580 160" fill="none" stroke="#a03358" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M532 140 Q555 162 575 182" fill="none" stroke="#a03358" stroke-width="2.8" stroke-linecap="round"/>
+                <circle cx="575" cy="100" r="5.5" fill="#a03358" opacity="0.8"/>
+                <circle cx="580" cy="122" r="4.5" fill="#a03358" opacity="0.75"/>
+                <circle cx="584" cy="140" r="5.5" fill="#a03358" opacity="0.8"/>
+                <circle cx="580" cy="160" r="4.5" fill="#a03358" opacity="0.75"/>
+                <circle cx="575" cy="182" r="5.5" fill="#a03358" opacity="0.8"/>
+              </g>
+
+              <!-- ── STATIC LABELS (shown when nothing isolated) ── -->
+              <g id="ns-labels" font-family="DM Sans,sans-serif" font-size="11" text-anchor="middle">
+                <text x="88"  y="42"  fill="rgba(107,63,160,0.65)">Dendrites</text>
+                <text x="200" y="192" fill="rgba(192,122,16,0.75)">Soma</text>
+                <text x="255" y="122" fill="rgba(138,92,46,0.65)" font-size="9.5">Axon hillock</text>
+                <text x="406" y="114" fill="rgba(92,122,62,0.65)">Myelin sheath</text>
+                <text x="406" y="162" fill="rgba(124,32,64,0.6)" font-size="9.5">Axon</text>
+                <text x="610" y="138" fill="rgba(160,51,88,0.7)">Axon terminals</text>
+              </g>
+            </svg>
+            <div class="nstruct-tooltip" id="ns-tooltip"></div>
+          </div>
+        </div>
+
+        <!-- Part selector pills -->
+        <div class="nstruct-pills">
+          <h4>Isolate a part</h4>
+          <div class="npill active" id="pill-all"          onclick="isolatePart('all')"      style="color:var(--text)"><span class="dot" style="background:var(--text);opacity:0.3"></span>Show all</div>
+          <div class="npill" id="pill-dendrites"  onclick="isolatePart('dendrites')"  style="color:#6b3fa0"><span class="dot" style="background:#6b3fa0"></span>Dendrites</div>
+          <div class="npill" id="pill-soma"       onclick="isolatePart('soma')"       style="color:#c07a10"><span class="dot" style="background:#c07a10"></span>Soma</div>
+          <div class="npill" id="pill-hillock"    onclick="isolatePart('hillock')"    style="color:#8a5c2e"><span class="dot" style="background:#8a5c2e"></span>Axon hillock</div>
+          <div class="npill" id="pill-axon"       onclick="isolatePart('axon')"       style="color:#7c2040"><span class="dot" style="background:#7c2040"></span>Axon</div>
+          <div class="npill" id="pill-myelin"     onclick="isolatePart('myelin')"     style="color:#5c7a3e"><span class="dot" style="background:#5c7a3e"></span>Myelin sheath</div>
+          <div class="npill" id="pill-terminal"   onclick="isolatePart('terminal')"   style="color:#a03358"><span class="dot" style="background:#a03358"></span>Axon terminals</div>
+        </div>
+      </div>
+
+      <!-- Info panel -->
+      <div class="nstruct-info" id="nstruct-info">
+        <div class="nstruct-info-tag" style="color:var(--muted);background:var(--bg3)" id="ns-info-tag">Hover or select a part</div>
+        <div class="nstruct-info-title" id="ns-info-title">Neuron anatomy</div>
+        <p id="ns-info-body">A neuron is a specialised cell that transmits information through electrical and chemical signals. Each part plays a distinct role — from receiving inputs to generating and transmitting action potentials down the axon to neighbouring cells.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEURON EXPLORER -->
+<div id="neuron" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>Interactive Explorer</div>
+    <h2 class="stitle">Anatomy of a neuron</h2>
+    <p class="ssub">Click any part to highlight it on the diagram, then fire an action potential to watch how an electrical signal travels from dendrite to axon terminal.</p>
+    <div class="nexplorer">
+      <div class="nbox">
+        <div class="nbox-title">Neuron Diagram</div>
+        <div class="nbox-sub">Click a part card to highlight it · Fire to animate signal propagation</div>
+        <canvas id="neuron-canvas" height="320"></canvas>
+        <div class="sig-track"><div class="sig-fill" id="sfill"></div></div>
+        <div class="nbtns">
+          <button class="nbtn lit" id="firebtn" onclick="fireSignal()">⚡ Fire Action Potential</button>
+          <button class="nbtn" onclick="resetNeuron()">Reset</button>
+        </div>
+      </div>
+      <div class="nparts" id="nparts">
+        <div class="npart sel" data-p="dendrites" onclick="selPart(this,'dendrites')"><span class="ptag">Input</span><h4>Dendrites</h4><p>Branch-like extensions receiving incoming signals from other neurons via synapses. The wider the dendritic tree, the more inputs the neuron can integrate simultaneously.</p></div>
+        <div class="npart" data-p="soma"      onclick="selPart(this,'soma')"><span class="ptag">Processing</span><h4>Cell Body (Soma)</h4><p>The metabolic hub of the neuron. Integrates all incoming signals — if the combined input exceeds ~−55 mV, an action potential is triggered at the axon hillock.</p></div>
+        <div class="npart" data-p="axon"      onclick="selPart(this,'axon')"><span class="ptag">Transmission</span><h4>Axon</h4><p>A long fibre carrying the electrical signal away from the soma. Can extend up to 1 metre in motor neurons. Wrapped in myelin sheath segments separated by Nodes of Ranvier.</p></div>
+        <div class="npart" data-p="myelin"    onclick="selPart(this,'myelin')"><span class="ptag">Insulation</span><h4>Myelin Sheath</h4><p>Fatty insulation formed by oligodendrocytes (CNS). Enables saltatory conduction — signals jump between Nodes of Ranvier, boosting speed up to 100× compared to unmyelinated fibres.</p></div>
+        <div class="npart" data-p="terminal"  onclick="selPart(this,'terminal')"><span class="ptag">Output</span><h4>Axon Terminal</h4><p>When an action potential arrives, vesicles release neurotransmitters into the synaptic cleft, passing the signal to the dendrites of the next neuron and completing the relay.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MACHINE -->
+<div id="machine" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>Artificial Neural Networks</div>
+    <h2 class="stitle">Teaching machines to think</h2>
+    <p class="ssub">ANNs are mathematical models inspired by the brain. Tweak the architecture below and watch the network reconfigure in real time.</p>
+    <div class="mgrid">
+      <div class="ann-wrap">
+        <div class="ann-title">Live Architecture Visualiser</div>
+        <div class="ann-sub">Adjust layers and nodes — the network redraws instantly</div>
+        <canvas id="ann-canvas" height="300"></canvas>
+        <div class="ctrl-row">
+          <div class="ctrl"><div class="ctrl-lbl">Hidden Layers<span id="lv">2</span></div><input type="range" min="1" max="5" value="2" id="lc" oninput="updANN()"></div>
+          <div class="ctrl"><div class="ctrl-lbl">Nodes / Layer<span id="nv">5</span></div><input type="range" min="2" max="8" value="5" id="nc" oninput="updANN()"></div>
+        </div>
+      </div>
+      <div class="mstack">
+        <div class="mcard"><div class="mbadge">Architecture</div><h4>Layers &amp; Weights</h4><p>ANNs organise nodes in layers: input, hidden, and output. Each connection carries a learnable weight. A node computes a weighted sum then applies a non-linear activation like ReLU or sigmoid.</p></div>
+        <div class="mcard"><div class="mbadge">Learning</div><h4>Backpropagation</h4><p>The network predicts, compares to ground truth via a loss function, then propagates error backward — computing gradients via the chain rule and updating weights via gradient descent. Analogous to synaptic strengthening.</p></div>
+        <div class="mcard"><div class="mbadge">Biology × AI</div><h4>ML in Bioinformatics</h4><p>Deep learning predicts 3D protein structures (AlphaFold2), classifies cancer subtypes from genomics data, identifies drug-target interactions, and analyses single-cell RNA sequencing at scale.</p></div>
+        <div class="mcard"><div class="mbadge">Data Mining</div><h4>Pattern Discovery</h4><p>Clustering identifies gene expression groups. UMAP and PCA visualise high-dimensional data. Association rule mining finds co-expression networks — extracting biological signal from noise.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<div id="compare" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>Brain vs Machine</div>
+    <h2 class="stitle">Two kinds of intelligence</h2>
+    <p class="ssub">500 million years of evolution versus 70 years of engineering — head-to-head across architecture, learning, and performance.</p>
+    <div class="c2">
+      <div class="chero bio"><div class="clbl">Biological</div><div class="ctitle">The Human Brain</div><div class="csub">Evolved. Efficient. Conscious.</div><div class="cbg">Bio</div></div>
+      <div class="chero mach"><div class="clbl">Artificial</div><div class="ctitle">Neural Networks</div><div class="csub">Engineered. Scalable. Precise.</div><div class="cbg">ANN</div></div>
+    </div>
+    <div class="ctable-wrap">
+      <table class="ctable">
+        <thead><tr><th>Property</th><th>🧠 Biological Brain</th><th>🤖 Artificial ANN</th></tr></thead>
+        <tbody>
+          <tr><td>Basic unit</td><td class="bv">Biological neuron</td><td class="mv">Mathematical node</td></tr>
+          <tr><td>Connections</td><td class="bv">~100 trillion synapses</td><td class="mv">Millions–billions of weights</td></tr>
+          <tr><td>Signal type</td><td class="bv">Electrochemical pulses</td><td class="mv">Floating-point numbers</td></tr>
+          <tr><td>Learning rule</td><td class="bv">Hebbian / synaptic plasticity</td><td class="mv">Gradient descent + backprop</td></tr>
+          <tr><td>Processing</td><td class="bv">Massively parallel, analogue</td><td class="mv">GPU-parallel, digital</td></tr>
+          <tr><td>Power use</td><td class="bv">~20 watts</td><td class="mv">Hundreds–thousands of watts</td></tr>
+          <tr><td>Signal speed</td><td class="bv">Up to 120 m/s</td><td class="mv">Near speed of light</td></tr>
+          <tr><td>Learning speed</td><td class="bv">Slow (sleep consolidation)</td><td class="mv">Hours–days on datasets</td></tr>
+          <tr><td>Few-shot learning</td><td class="bv">Excellent (1–5 examples)</td><td class="mv">Needs large datasets</td></tr>
+          <tr><td>Generalisation</td><td class="bv">Robust, contextual</td><td class="mv">Can overfit without regularisation</td></tr>
+          <tr><td>Consciousness</td><td class="bv">Present (debated)</td><td class="mv">Absent</td></tr>
+          <tr><td>Emotion</td><td class="bv">Chemically modulated</td><td class="mv">Not present</td></tr>
+          <tr><td>Fault tolerance</td><td class="bv">Graceful degradation</td><td class="mv">Moderate</td></tr>
+          <tr><td>Energy source</td><td class="bv">Glucose (aerobic)</td><td class="mv">Electricity</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div id="team" class="page">
+  <div class="section">
+    <div class="eyebrow"><span class="eline"></span>About</div>
+    <h2 class="stitle">Eight minds, one website</h2>
+    <div class="tintro">
+      <div><h3>SynapseIQ</h3><p>Built for the Unit 4 Neurobiology module. This project explores the parallels and differences between biological neural networks and artificial ones — from Hebbian learning to backpropagation, from synaptic clefts to gradient descent.</p></div>
+      <div style="text-align:center">
+        <div style="font-family:var(--serif);font-size:52px;letter-spacing:-2px;background:linear-gradient(135deg,var(--burg),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">8</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">members</div>
+      </div>
+    </div>
+    <div class="tgrid" id="tgrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="flogo">SynapseIQ</div>
+  <div>Unit 4 Neurobiology · 2026</div>
+  <div>Deployed on Vercel</div>
+</footer>
+
+<script>
+// ── MOBILE MENU ──────────────────────────────────────
+const PAGE_IDS = ['home','bio','nstruct','neuron','machine','compare','team'];
+
+function toggleMobileMenu(){
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('ham-btn');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+function closeMobileMenu(){
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('ham-btn').classList.remove('open');
+}
+function mobileNav(id){
+  // Update mobile link highlights
+  PAGE_IDS.forEach(p=>{
+    const el = document.getElementById('mob-'+p);
+    if(el) el.classList.toggle('active', p===id);
+  });
+  show(id, document.querySelector(`#nl a[onclick*="'${id}'"]`));
+  closeMobileMenu();
+}
+
+// ── NAV ──────────────────────────────────────────────
+function show(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#nl a').forEach(a=>a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='machine') setTimeout(drawANN,60);
+  if(id==='neuron')  setTimeout(drawNeuron,60);
+  if(id==='nstruct') setTimeout(()=>{ nsInit(); nsApplyIsolation('all'); nsUpdateInfo('all'); },60);
+}
+
+// ── FLOATING NEURON BACKGROUND ───────────────────────
+(function(){
+  const canvas=document.getElementById('neuron-bg');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,nodes=[],rafId;
+  function resize(){ W=canvas.width=canvas.offsetWidth; H=canvas.height=canvas.offsetHeight; }
+  function init(){ nodes=Array.from({length:45},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.26,vy:(Math.random()-.5)*.26,r:1.8+Math.random()*2})); }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    nodes.forEach(n=>{ n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>W)n.vx*=-1; if(n.y<0||n.y>H)n.vy*=-1; });
+    for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
+      const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<140){
+        const a=(1-dist/140)*0.22;
+        const g=ctx.createLinearGradient(nodes[i].x,nodes[i].y,nodes[j].x,nodes[j].y);
+        g.addColorStop(0,`rgba(107,63,160,${a})`); g.addColorStop(1,`rgba(124,32,64,${a})`);
+        ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);
+        ctx.strokeStyle=g;ctx.lineWidth=0.5;ctx.stroke();
+      }
+    }
+    nodes.forEach(n=>{ ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(107,63,160,0.45)';ctx.fill(); });
+    rafId=requestAnimationFrame(draw);
+  }
+  resize(); init(); draw();
+  window.addEventListener('resize',()=>{ cancelAnimationFrame(rafId); resize(); draw(); });
+})();
+
+// ── NEURON STRUCTURE ─────────────────────────────────
+const NS_INFO = {
+  all: {
+    tag:'Overview', color:'var(--muted)', bg:'var(--bg3)',
+    title:'Neuron anatomy',
+    body:'A neuron is a specialised cell that transmits information through electrical and chemical signals. Each part plays a distinct role — from receiving inputs to generating and transmitting action potentials down the axon to neighbouring cells.'
+  },
+  dendrites: {
+    tag:'Input zone', color:'#6b3fa0', bg:'rgba(107,63,160,0.1)',
+    title:'Dendrites',
+    body:'Branch-like extensions that receive incoming electrochemical signals from thousands of neighbouring neurons. Signal integration across the dendritic tree determines whether the neuron fires. Larger, more branched trees allow richer input processing.'
+  },
+  soma: {
+    tag:'Processing centre', color:'#c07a10', bg:'rgba(192,122,16,0.1)',
+    title:'Cell Body (Soma)',
+    body:'The metabolic hub of the neuron, containing the nucleus and organelles. It sums all incoming excitatory and inhibitory signals. If the net depolarisation at the axon hillock reaches ~−55 mV, an action potential is triggered.'
+  },
+  hillock: {
+    tag:'Trigger zone', color:'#8a5c2e', bg:'rgba(138,92,46,0.1)',
+    title:'Axon Hillock',
+    body:'The junction between the soma and the axon — the site where action potentials are initiated. It has the highest density of voltage-gated Na⁺ channels in the neuron, making it uniquely sensitive to the threshold for firing.'
+  },
+  axon: {
+    tag:'Transmission fibre', color:'#7c2040', bg:'rgba(124,32,64,0.1)',
+    title:'Axon',
+    body:'A long projection that carries action potentials away from the soma toward the axon terminals. Motor neuron axons can reach 1 metre long. Conduction speed ranges from 0.5 to 120 m/s depending on diameter and myelination.'
+  },
+  myelin: {
+    tag:'Insulation', color:'#5c7a3e', bg:'rgba(92,122,62,0.1)',
+    title:'Myelin Sheath',
+    body:'Fatty insulation produced by oligodendrocytes (CNS) or Schwann cells (PNS). It wraps the axon in segments, forcing the action potential to jump between Nodes of Ranvier in saltatory conduction — increasing speed up to 100× and reducing energy cost.'
+  },
+  terminal: {
+    tag:'Output zone', color:'#a03358', bg:'rgba(160,51,88,0.1)',
+    title:'Axon Terminals',
+    body:'Bulb-shaped endings at the end of axon branches. When an action potential arrives, voltage-gated Ca²⁺ channels open, triggering synaptic vesicles to fuse with the membrane and release neurotransmitters into the synaptic cleft, passing the signal on.'
+  }
+};
+
+let nsIsolated = 'all';
+let nsHovered  = null;
+
+function nsInit() {
+  const svg = document.getElementById('nstruct-svg');
+  if (!svg) return;
+
+  const parts = svg.querySelectorAll('.ns-part');
+  const tooltip = document.getElementById('ns-tooltip');
+
+  parts.forEach(g => {
+    const part = g.dataset.part;
+
+    g.addEventListener('mouseenter', function(e) {
+      nsHovered = part;
+      if (nsIsolated === 'all' || nsIsolated === part) {
+        nsApplyGlow(part, true);
+        nsShowTooltip(tooltip, g, part);
+        nsUpdateInfo(part);
+      }
+    });
+
+    g.addEventListener('mouseleave', function() {
+      nsHovered = null;
+      nsApplyGlow(part, false);
+      tooltip.style.opacity = '0';
+      if (nsIsolated === 'all') nsUpdateInfo('all');
+      else nsUpdateInfo(nsIsolated);
+    });
+
+    g.addEventListener('click', function() {
+      isolatePart(part === nsIsolated ? 'all' : part);
+    });
+
+    // Touch support for mobile
+    g.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      tooltip.style.opacity = '0';
+      if (nsIsolated === 'all' || nsIsolated === part) {
+        nsApplyGlow(part, true);
+        nsShowTooltip(tooltip, g, part);
+        nsUpdateInfo(part);
+        setTimeout(()=>{ tooltip.style.opacity='0'; nsApplyGlow(part,false); }, 1800);
+      }
+    }, {passive:false});
+
+    g.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      isolatePart(part === nsIsolated ? 'all' : part);
+    }, {passive:false});
+  });
+}
+
+function nsApplyGlow(part, on) {
+  const g = document.getElementById('ns-' + part);
+  if (!g) return;
+  const info = NS_INFO[part];
+  if (on) {
+    g.style.filter = `drop-shadow(0 0 8px ${info.color}) drop-shadow(0 0 3px ${info.color})`;
+    // Brighten strokes/fills temporarily
+    g.querySelectorAll('path,line,circle,rect').forEach(el => {
+      el.style.transition = 'opacity .15s';
+      el.style.opacity = '1';
+    });
+  } else {
+    g.style.filter = '';
+    nsApplyIsolation(nsIsolated); // restore isolation state
+  }
+}
+
+function nsShowTooltip(tooltip, g, part) {
+  const info = NS_INFO[part];
+  const svgEl = document.getElementById('nstruct-svg');
+  const svgRect = svgEl.getBoundingClientRect();
+  const gRect = g.getBoundingClientRect();
+  const left = gRect.left + gRect.width/2 - svgRect.left;
+  const top  = gRect.top - svgRect.top - 34;
+  tooltip.textContent = info.title;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top  = top  + 'px';
+  tooltip.style.background = info.color;
+  tooltip.style.color = '#fff';
+  tooltip.style.opacity = '1';
+}
+
+function nsUpdateInfo(part) {
+  const info = NS_INFO[part] || NS_INFO['all'];
+  const tagEl   = document.getElementById('ns-info-tag');
+  const titleEl = document.getElementById('ns-info-title');
+  const bodyEl  = document.getElementById('ns-info-body');
+  tagEl.textContent   = info.tag;
+  tagEl.style.color   = info.color;
+  tagEl.style.background = info.bg;
+  titleEl.textContent = info.title;
+  bodyEl.textContent  = info.body;
+}
+
+function isolatePart(part) {
+  nsIsolated = part;
+  // Update pill states
+  document.querySelectorAll('.npill').forEach(p => p.classList.remove('active'));
+  const activePill = document.getElementById('pill-' + part);
+  if (activePill) activePill.classList.add('active');
+  nsApplyIsolation(part);
+  nsUpdateInfo(part);
+}
+
+function nsApplyIsolation(part) {
+  const allParts = ['dendrites','soma','hillock','axon','myelin','terminal'];
+  const labels = document.getElementById('ns-labels');
+
+  if (part === 'all') {
+    allParts.forEach(p => {
+      const g = document.getElementById('ns-' + p);
+      if (g) { g.style.opacity = '1'; g.style.filter = ''; }
+    });
+    if (labels) labels.style.opacity = '1';
+  } else {
+    allParts.forEach(p => {
+      const g = document.getElementById('ns-' + p);
+      if (!g) return;
+      if (p === part) {
+        g.style.opacity = '1';
+        // Pop the selected part with a glow
+        const info = NS_INFO[part];
+        g.style.filter = `drop-shadow(0 0 10px ${info.color}) drop-shadow(0 0 4px ${info.color})`;
+      } else {
+        g.style.opacity = '0.07';
+        g.style.filter = '';
+      }
+    });
+    if (labels) labels.style.opacity = '0';
+  }
+}
+
+// ── NEURON EXPLORER ───────────────────────────────────
+// Part colours mapped to the new palette
+const PCOLS={
+  dendrites:'#6b3fa0',   // violet
+  soma:     '#c07a10',   // warm amber-brown
+  axon:     '#7c2040',   // burgundy
+  myelin:   '#5c7a3e',   // olive green (distinct from others)
+  terminal: '#a03358',   // burg-pink
+};
+
+let selP='dendrites', sigP=0, firing=false;
+
+function selPart(el, p){
+  document.querySelectorAll('.npart').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  selP=p;
+  drawNeuron();
+}
+
+function resetNeuron(){
+  // Stop any running animation
+  firing=false;
+  sigP=0;
+  document.getElementById('sfill').style.width='0%';
+  document.getElementById('firebtn').style.opacity='1';
+  // Clear all selections
+  selP=null;
+  document.querySelectorAll('.npart').forEach(c=>c.classList.remove('sel'));
+  drawNeuron(0);
+}
+
+function fireSignal(){
+  if(firing)return;
+  firing=true; sigP=0;
+  document.getElementById('firebtn').style.opacity='0.55';
+  (function step(){
+    if(!firing){ // aborted by reset
+      document.getElementById('sfill').style.width='0%';
+      document.getElementById('firebtn').style.opacity='1';
+      drawNeuron(0); return;
+    }
+    sigP+=0.016;
+    document.getElementById('sfill').style.width=Math.min(sigP*100,100)+'%';
+    drawNeuron(sigP);
+    if(sigP<1.06){ requestAnimationFrame(step); }
+    else{
+      firing=false; sigP=0;
+      document.getElementById('sfill').style.width='0%';
+      document.getElementById('firebtn').style.opacity='1';
+      setTimeout(()=>drawNeuron(0),300);
+    }
+  })();
+}
+
+function drawNeuron(sig=0){
+  const c=document.getElementById('neuron-canvas'); if(!c)return;
+  const ctx=c.getContext('2d');
+  const W=c.offsetWidth||640; c.width=W; c.height=320;
+  // Clear with bg colour
+  ctx.fillStyle='#fdf8f0'; ctx.fillRect(0,0,W,320);
+
+  const H=320, somaX=W*0.29, somaY=H/2, somaR=34;
+  const termX=W*0.91, axS=somaX+somaR+4, axE=termX-20, axL=axE-axS;
+
+  const hi=p=>selP===null||selP===p;
+  const gl=p=>selP===p;
+  const pa=p=>hi(p)?1:0.18;
+
+  // ── DENDRITES ──
+  const DENS=[[-92,-62,-58,-22],[-98,0,-54,4],[-92,62,-58,24],[-78,-102,-46,-48],[-78,102,-46,48],[-58,-128,-33,-62],[-58,128,-33,62]];
+  const dSig=sig>0?Math.min(sig/0.11,1):0;
+  ctx.save(); ctx.globalAlpha=pa('dendrites');
+  DENS.forEach(([dx,dy,cx2,cy2])=>{
+    ctx.beginPath(); ctx.moveTo(somaX,somaY); ctx.quadraticCurveTo(somaX+cx2,somaY+cy2,somaX+dx,somaY+dy);
+    if(dSig>0){ ctx.strokeStyle=`rgba(107,63,160,${0.4+dSig*0.55})`; ctx.lineWidth=3+dSig*3; ctx.shadowColor='#6b3fa0'; ctx.shadowBlur=dSig*12; }
+    else{ const g=ctx.createLinearGradient(somaX+dx,somaY+dy,somaX,somaY); g.addColorStop(0,'rgba(107,63,160,0.25)'); g.addColorStop(1,'rgba(107,63,160,0.7)'); ctx.strokeStyle=g; ctx.lineWidth=2.5; ctx.shadowBlur=0; }
+    ctx.lineCap='round'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(somaX+dx,somaY+dy,3.5,0,Math.PI*2);
+    ctx.fillStyle=dSig>0?'#6b3fa0':'rgba(107,63,160,0.5)'; ctx.shadowBlur=dSig>0?8:0; ctx.fill();
+  });
+  if(gl('dendrites')){ ctx.shadowColor='#6b3fa0'; ctx.shadowBlur=18; ctx.strokeStyle='rgba(107,63,160,0.18)'; ctx.lineWidth=9; DENS.slice(0,3).forEach(([dx,dy,cx2,cy2])=>{ ctx.beginPath();ctx.moveTo(somaX,somaY);ctx.quadraticCurveTo(somaX+cx2,somaY+cy2,somaX+dx,somaY+dy);ctx.stroke(); }); }
+  ctx.restore();
+
+  // ── MYELIN ──
+  const MSEGS=10, mAlpha=pa('myelin');
+  ctx.save(); ctx.globalAlpha=mAlpha;
+  for(let s=0;s<MSEGS;s++){
+    const t0=s/MSEGS, t1=(s+0.72)/MSEGS, x0=axS+t0*axL, x1=axS+t1*axL;
+    const aP=sig>0.11?(sig-0.11)/0.76:0, mid=(t0+t1)/2;
+    const lit=aP>mid-0.11&&aP<mid+0.13;
+    ctx.beginPath(); ctx.roundRect(x0,somaY-15,x1-x0,30,7);
+    ctx.fillStyle=lit?'rgba(92,122,62,0.45)':(gl('myelin')?'rgba(92,122,62,0.18)':'rgba(140,160,100,0.12)');
+    ctx.strokeStyle=lit?'#5c7a3e':(gl('myelin')?'rgba(92,122,62,0.6)':'rgba(92,122,62,0.28)');
+    ctx.lineWidth=1; if(lit){ctx.shadowColor='#5c7a3e';ctx.shadowBlur=10;}else ctx.shadowBlur=0;
+    ctx.fill(); ctx.stroke();
+    if(s<MSEGS-1){ ctx.font='8.5px DM Sans,sans-serif'; ctx.fillStyle='rgba(92,122,62,0.55)'; ctx.textAlign='center'; ctx.shadowBlur=0; ctx.fillText('NoR',axS+t1*axL+2,somaY+27); }
+  }
+  ctx.restore();
+
+  // ── AXON ──
+  ctx.save(); ctx.globalAlpha=pa('axon');
+  const aP2=sig>0.11?(sig-0.11)/0.76:0;
+  const ag=ctx.createLinearGradient(axS,0,axE,0);
+  if(sig>0.11){
+    const p=aP2;
+    ag.addColorStop(Math.max(0,p-0.15),'rgba(124,32,64,0.2)'); ag.addColorStop(Math.max(0,p-0.04),'rgba(124,32,64,0.85)');
+    ag.addColorStop(Math.min(1,p+0.04),'rgba(255,200,180,0.95)'); ag.addColorStop(Math.min(1,p+0.12),'rgba(124,32,64,0.5)');
+    ag.addColorStop(1,'rgba(124,32,64,0.15)');
+  }else{ ag.addColorStop(0,'rgba(124,32,64,0.75)'); ag.addColorStop(1,'rgba(160,51,88,0.5)'); }
+  ctx.beginPath(); ctx.moveTo(axS,somaY); ctx.lineTo(axE,somaY);
+  ctx.strokeStyle=ag; ctx.lineWidth=5; ctx.lineCap='round';
+  if(gl('axon')){ctx.shadowColor='#7c2040';ctx.shadowBlur=14;}
+  else if(sig>0.11){ctx.shadowColor='rgba(255,180,150,0.8)';ctx.shadowBlur=aP2*16;}
+  ctx.stroke(); ctx.restore();
+
+  // ── SOMA ──
+  ctx.save(); ctx.globalAlpha=pa('soma');
+  const sFire=sig>0&&sig<0.14, sI=sFire?Math.sin(sig/0.14*Math.PI):0;
+  const sg=ctx.createRadialGradient(somaX-10,somaY-10,4,somaX,somaY,somaR);
+  if(sFire){ sg.addColorStop(0,`rgba(240,180,60,${0.7+sI*0.3})`); sg.addColorStop(0.5,`rgba(220,130,30,${0.55+sI*0.3})`); sg.addColorStop(1,'rgba(180,80,20,0.35)'); ctx.shadowColor='#c07a10'; ctx.shadowBlur=24*sI; }
+  else{ sg.addColorStop(0,'rgba(240,180,60,0.85)'); sg.addColorStop(0.5,'rgba(210,140,30,0.7)'); sg.addColorStop(1,'rgba(160,90,20,0.25)'); if(gl('soma')){ctx.shadowColor='#c07a10';ctx.shadowBlur=18;} }
+  ctx.beginPath(); ctx.arc(somaX,somaY,somaR,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+  ctx.strokeStyle=sFire?'#e8a820':(gl('soma')?'#c07a10':'rgba(192,122,16,0.4)'); ctx.lineWidth=1.5; ctx.stroke();
+  // nucleus
+  const ng=ctx.createRadialGradient(somaX-3,somaY-3,2,somaX,somaY,12);
+  ng.addColorStop(0,'rgba(255,230,140,0.55)'); ng.addColorStop(1,'rgba(200,130,40,0.22)');
+  ctx.beginPath(); ctx.arc(somaX,somaY,12,0,Math.PI*2); ctx.fillStyle=ng; ctx.fill();
+  ctx.strokeStyle='rgba(240,180,60,0.4)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.shadowBlur=0; ctx.restore();
+
+  // ── TERMINALS ──
+  const TERMS=[[18,-38],[22,-16],[20,4],[17,22],[13,40]];
+  ctx.save(); ctx.globalAlpha=pa('terminal');
+  const tFire=sig>0.88, tI=tFire?Math.min((sig-0.88)/0.12,1):0;
+  TERMS.forEach(([bx,by],idx)=>{
+    const tx=termX+bx, ty=somaY+by;
+    ctx.beginPath(); ctx.moveTo(termX,somaY); ctx.quadraticCurveTo(termX+bx*0.4,somaY+by*0.5,tx,ty);
+    ctx.strokeStyle=tFire?`rgba(160,51,88,${0.5+tI*0.45})`:(gl('terminal')?'rgba(160,51,88,0.7)':'rgba(160,51,88,0.38)');
+    ctx.lineWidth=2.5; if(tFire){ctx.shadowColor='#a03358';ctx.shadowBlur=10*tI;} ctx.lineCap='round'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(tx,ty,tFire?5+tI*3:4.5,0,Math.PI*2);
+    ctx.fillStyle=tFire?`rgba(160,51,88,${0.6+tI*0.35})`:(gl('terminal')?'#a03358':'rgba(160,51,88,0.45)');
+    if(tFire){ctx.shadowColor='#a03358';ctx.shadowBlur=12*tI;} ctx.fill();
+    if(tFire&&tI>0.45){ for(let d=0;d<3;d++){ ctx.beginPath(); ctx.arc(tx+8+d*5+Math.sin(Date.now()/200+idx+d)*2,ty+(d-1)*5,2.2,0,Math.PI*2); ctx.fillStyle=`rgba(160,51,88,${tI*(0.3+d*0.1)})`; ctx.shadowBlur=5; ctx.fill(); } }
+  });
+  ctx.shadowBlur=0; ctx.restore();
+
+  // ── LABELS ──
+  ctx.textAlign='center';
+  [{p:'dendrites',x:somaX-72,y:somaY-125,t:'Dendrites'},
+   {p:'soma',x:somaX,y:somaY+somaR+20,t:'Soma'},
+   {p:'myelin',x:axS+axL*0.5,y:somaY-26,t:'Myelin Sheath'},
+   {p:'axon',x:axS+axL*0.5,y:somaY+24,t:'Axon'},
+   {p:'terminal',x:termX+28,y:somaY-52,t:'Axon Terminal'},
+  ].forEach(l=>{
+    if(selP===null){
+      ctx.fillStyle='rgba(90,60,30,0.5)';
+      ctx.font='11px DM Sans,sans-serif';
+    } else if(selP===l.p){
+      ctx.fillStyle=PCOLS[l.p];
+      ctx.font='500 11px DM Sans,sans-serif';
+    } else {
+      ctx.fillStyle='rgba(90,60,30,0.25)';
+      ctx.font='11px DM Sans,sans-serif';
+    }
+    ctx.fillText(l.t,l.x,l.y);
+  });
+
+  // ── SIGNAL PULSE ──
+  if(sig>0&&sig<1){
+    let px,py=somaY;
+    if(sig<0.11){ px=somaX+(axS-somaX)*(sig/0.11); }
+    else if(sig<0.87){ px=axS+(sig-0.11)/0.76*axL; }
+    else px=axE;
+    const pr=6.5+Math.sin(sig*45)*1.8;
+    ctx.beginPath(); ctx.arc(px,py,pr,0,Math.PI*2);
+    const pg=ctx.createRadialGradient(px,py,0,px,py,pr);
+    pg.addColorStop(0,'rgba(255,240,200,0.97)'); pg.addColorStop(0.4,'rgba(255,200,120,0.65)'); pg.addColorStop(1,'rgba(192,100,40,0)');
+    ctx.fillStyle=pg; ctx.shadowColor='rgba(240,160,40,0.8)'; ctx.shadowBlur=18; ctx.fill(); ctx.shadowBlur=0;
+  }
+}
+
+// ── ANN VISUALISER ────────────────────────────────────
+function updANN(){
+  document.getElementById('lv').textContent=document.getElementById('lc').value;
+  document.getElementById('nv').textContent=document.getElementById('nc').value;
+  drawANN();
+}
+function drawANN(){
+  const c=document.getElementById('ann-canvas'); if(!c)return;
+  const ctx=c.getContext('2d');
+  const L=parseInt(document.getElementById('lc').value), N=parseInt(document.getElementById('nc').value);
+  const W=c.offsetWidth||400; c.width=W; c.height=300;
+  ctx.fillStyle='#fdf8f0'; ctx.fillRect(0,0,W,300);
+  const all=[3,...Array(L).fill(N),2];
+  const lx=all.map((_,i)=>44+i*((W-88)/(all.length-1)));
+  const pos=all.map((n,li)=>{ const sp=Math.min(44,240/(n+1)),start=(300-(n-1)*sp)/2; return Array.from({length:n},(_,ni)=>({x:lx[li],y:start+ni*sp})); });
+  for(let li=0;li<pos.length-1;li++) for(const a of pos[li]) for(const b of pos[li+1]){
+    const w=Math.random(), al=0.05+w*0.13;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle=Math.random()>.4?`rgba(107,63,160,${al*1.8})`:`rgba(124,32,64,${al*1.5})`;
+    ctx.lineWidth=0.5+w*0.5;ctx.stroke();
+  }
+  pos.forEach((layer,li)=>{
+    const isIn=li===0,isOut=li===pos.length-1;
+    layer.forEach(({x,y})=>{
+      ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+      if(isIn){ctx.fillStyle='rgba(107,63,160,0.8)';ctx.strokeStyle='rgba(139,92,199,0.9)';}
+      else if(isOut){ctx.fillStyle='rgba(124,32,64,0.8)';ctx.strokeStyle='rgba(160,51,88,0.9)';}
+      else{ctx.fillStyle='rgba(237,228,211,0.95)';ctx.strokeStyle='rgba(92,61,30,0.3)';}
+      ctx.lineWidth=1.5;ctx.fill();ctx.stroke();
+    });
+  });
+  ctx.font='11px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(90,60,30,0.55)';
+  ctx.fillText('Input',lx[0],292);ctx.fillText('Output',lx[lx.length-1],292);
+  for(let i=1;i<lx.length-1;i++) ctx.fillText('H'+i,lx[i],292);
+}
+
+// ── TEAM ──────────────────────────────────────────────
+const members=[
+  {name:'Drishya',    role:'Home Page &amp; Design',    color:'#6b3fa0'},
+  {name:'Sudharshana',role:'Neurons &amp; Synapses',    color:'#8b5cc7'},
+  {name:'Anmol Goyal',role:'Glial Cells &amp; Anatomy', color:'#5c3d1e'},
+  {name:'Akshaya',    role:'Neuron Explorer',           color:'#7c2040'},
+  {name:'Shreya',     role:'ANN Explainer',             color:'#a03358'},
+  {name:'Dhruvil',    role:'ML &amp; Data Mining',      color:'#8a5c2e'},
+  {name:'Riddhi',     role:'Brain vs Machine',          color:'#5c7a3e'},
+  {name:'Brindha',    role:'About &amp; Deployment',    color:'#c07a10'},
+];
+document.getElementById('tgrid').innerHTML=members.map((m,i)=>{
+  const initials=m.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  return `<div class="tcard">
+    <div class="tav" style="background:${m.color}18;color:${m.color}">${initials}</div>
+    <div class="tname">${m.name}</div>
+    <div class="trole">${m.role}</div>
+  </div>`;
+}).join('');
+
+// ── INIT ──────────────────────────────────────────────
+setTimeout(()=>{ drawANN(); drawNeuron(); },100);
+</script>
+</body>
+</html>
